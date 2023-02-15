@@ -1,10 +1,10 @@
 
-all: cmd/nc
 NC := ./nc 
 
-cmd/nc: nc 
-nc: output/*.go quiz/*.go go.mod
-	go build -o $(NC) cmd/nc
+all: $(NC)
+
+$(NC): cmd/nc.go output/*.go quiz/*.go go.mod
+	go build -o $(NC) cmd/nc.go
 
 # TODO / TESTS 
 
