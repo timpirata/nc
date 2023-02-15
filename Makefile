@@ -3,8 +3,8 @@ NC := ./nc
 
 all: $(NC)
 
-$(NC): cmd/nc.go output/*.go quiz/*.go go.mod
-	go build -o $(NC) cmd/nc.go
+$(NC): cmd/nc/*.go output/*.go quiz/*.go go.mod
+	go build -x -o $(NC) ./cmd/nc
 
 # TODO / TESTS 
 
@@ -17,6 +17,9 @@ tests/output/3-multiplications-2-divisions.html: nc
 tests/output/5-each.pdf: nc 
 	# should produce PDF with 5 quiz/exam questions per type
 	$(NC) -A 5 -f pdf -o $<
+
+clean:
+	rm -f $(NC)
 
 serve:
 	# run NC as local webserver, serving quizzes on port 7898
