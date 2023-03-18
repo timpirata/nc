@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	serveHTTP = flag.Bool("serve", false, "Run as webserver / cloud function")
+	serveHTTP  = flag.Bool("serve", false, "Run as webserver / cloud function")
+	AppVersion string
 )
 
 func main() {
@@ -20,6 +21,9 @@ func main() {
 		address: thisOrThat(os.Getenv("NC_TCP_PORT"), ":2001"),
 		enabled: *serveHTTP,
 	}
-	fmt.Println("NC booting...")
+	fmt.Printf("NC version %s, inspired by Peter Norton et al, arising ..\n", AppVersion)
 	RunWebserver(httpdConfig)
+	// ProducePDF
+	// ProduceTEX
+	fmt.Println("My job is done here - pleased to meet ya!")
 }

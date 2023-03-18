@@ -1,21 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>{{.Title}}</title>
+    <!-- https://docs.mathjax.org/en/latest/web/components/combined.html -->
     <script>
         MathJax = {
             // your configuration here, if needed
         };
-        </script>
-        
-        <!-- https://docs.mathjax.org/en/latest/web/components/combined.html -->
+    </script>            
     <script type="text/javascript" id="MathJax-script" async src="/assets/js/tex-chtml-full-speech.js"></script>    
 </head>
 <body>
-<h1>nc</h1>
+<h1>nc - {{.Title}}</h1>
 Will this ever work? Who knows.
 
 When \(a \ne 0\), there are two solutions to \(ax^2 + bx + c = 0\) and they are
 $$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$
+
+<ol>
+    {{.Quizzes}}
+
+    {{ range $key, $value := . }}
+        <li><strong>{{ $key }}</strong>: {{ $value }}</li>
+    {{ end }}
+</ol>
+
 
 </body>
 </html>

@@ -19,8 +19,10 @@ const (
 	QUIZ_T_Person
 	QUIZ_T_Fortune
 	QUIZ_T_RANDOM
-	QUIZ_PARAM_Title = "title"
-	QUIZ_PARAM_List  = "quiz_list"
+	QUIZ_PARAM_Title  = "title"
+	QUIZ_PARAM_List   = "quiz_list"
+	SolutionsIncluded = true
+	SolutionsExcluded = false
 )
 
 type Quiz struct {
@@ -43,4 +45,20 @@ func NewQuizDocument() *QuizDocument {
 func (d *QuizDocument) AddQuiz(category int, parameters string, includeSolution bool) {
 	q := Quiz{Category: category, parameters: parameters, includeSolution: includeSolution}
 	d.Quizzes = append(d.Quizzes, q)
+}
+
+func ExampleQuiz1() *QuizDocument {
+	q := NewQuizDocument()
+	q.Title = "Maths basic test, 3 random: +,  -,  *, /"
+	// each q type => "random" params; parsed per quiz generator
+	_addition_max_20 := "left_op_max=10, right_op_max=10"
+	q.AddQuiz(QUIZ_T_ADDITION, _addition_max_20, SolutionsIncluded)
+	q.AddQuiz(QUIZ_T_ADDITION, _addition_max_20, SolutionsExcluded)
+	q.AddQuiz(QUIZ_T_ADDITION, _addition_max_20, SolutionsExcluded)
+
+	_substraction_positive_from_100 := "left_op_max=100, right_op_max=$left_op"
+	q.AddQuiz(QUIZ_T_SUBSTRACTION, _substraction_positive_from_100, SolutionsExcluded)
+	q.AddQuiz(QUIZ_T_SUBSTRACTION, _substraction_positive_from_100, SolutionsExcluded)
+	q.AddQuiz(QUIZ_T_SUBSTRACTION, _substraction_positive_from_100, SolutionsExcluded)
+	return q
 }

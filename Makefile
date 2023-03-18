@@ -2,7 +2,14 @@
 
 BUILD_ROOT := ./build
 NC := $(BUILD_ROOT)/nc 
+NC_VERSION := $(shell git describe --tags | cut -dv -f2)
+LDFLAGS := -X main.AppVersion=$(NC_VERSION)
+DOCKER_IMAGE := schnoddelbotz/nc
+DOCKER_TAGS := -t $(DOCKER_IMAGE):latest -t $(DOCKER_IMAGE):$(NC_VERSION)
 GOCURL := $(BUILD_ROOT)/gocurl
+
+# If I wasn't into semantic versioning, I'd have this one called
+# Basic Application Example, 4. You.
 
 # HTML output dependency MathJax, to render TeX formulae.
 # to update, set version number and run `make update-mathjax`.
@@ -18,7 +25,7 @@ nc: $(NC) ESC
 
 $(NC): ESC cmd/nc/*.go output/*.go quiz/*.go go.mod
 	go generate ./...
-	go build -o $(NC) ./cmd/nc
+	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o $(NC) ./cmd/nc
 
 ESC:
 	test -n "$(shell which esc)" || go install github.com/mjibson/esc
@@ -36,7 +43,7 @@ tests/output/5-each.pdf: nc
 	$(NC) -A 5 -f pdf -o $<
 
 clean:
-	rm -f $(NC) $(GOCURL) $(MATHJAX_ZIP) 
+	rm -f $(NC) $(GOCURL) $(MATHJAX_ZIP) build/_docker_image
 	rm -rf $(MATHJAX_DIR) 
 
 serve:
@@ -47,6 +54,25 @@ deploy:
 	# should deploy as cloudfunction 
 	gcloud deploy
 
+#
+# Docker 
+
+build/_docker_image:
+	docker build $(DOCKER_TAGS) --progress plain .
+	touch build/_docker_image
+
+docker-image-uncached:
+	docker build $(DOCKER_TAGS) --progress plain --no-cache .
+
+docker-image: build/_docker_image
+	
+docker-ratzeputz:
+	docker system prune -af
+
+docker-serve: docker-image
+	docker run -p2001:2001 $(DOCKER_IMAGE):latest ./nc -serve
+
+ratzeputz: clean docker-ratzeputz
 
 #
 # Dependencies 

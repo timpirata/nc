@@ -40,8 +40,8 @@ func RunWebserver(config httpdConfig) {
 
 	http.HandleFunc("/", indexHandler)
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(output.MustFs())))
-	err := http.ListenAndServe(config.address, nil)
 
+	err := http.ListenAndServe(config.address, nil)
 	if err != nil {
 		log.Fatalf("could not start listening or address %s %s", config.address, err)
 	}
@@ -52,17 +52,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(renderIndexTemplate(*quizDoc))
 }
 
-func assetHandler(w http.ResponseWriter, r *http.Request) {
-	http.FileServer(output.MustFs())
-	// if r.RequestURI == "/assets/js/tex-chtml-full-speech.js" {
-	// 	w.Header().Set("Content-type", "text/javascript")
-	// 	w.Write(output.MustGetByte("/js/tex-chtml-full-speech.js"))
-	// 	return
-	// }
-	// log.Printf("404 /assets/ %s", r.RequestURI)
-}
-
-func renderIndexTemplate(card quiz.QuizDocument) []byte {
+func renderIndexTemplate(quizDocument quiz.QuizDocument) []byte {
 	buf := &bytes.Buffer{}
 
 	indexHTML := output.MustGetTemplate("/html/index.html")
@@ -70,7 +60,7 @@ func renderIndexTemplate(card quiz.QuizDocument) []byte {
 	if err != nil {
 		log.Fatalf("Template parsing error: %v\n", err)
 	}
-	err = tpl.Execute(buf, card)
+	err = tpl.Execute(buf, quizDocument)
 	if err != nil {
 		log.Printf("Template execution error: %v\n", err)
 	}
@@ -78,10 +68,9 @@ func renderIndexTemplate(card quiz.QuizDocument) []byte {
 }
 
 func urlParamsToQuizDocument(r *http.Request) *quiz.QuizDocument {
-	doc := &quiz.QuizDocument{
-		Title:       r.URL.Query().Get(quiz.QUIZ_PARAM_Title),
-		QueryString: r.URL.RawQuery,
-	}
+	testQuiz := quiz.ExampleQuiz1() // DEV WIP -> test. tdd?
+	testQuiz.Title = r.URL.Query().Get(quiz.QUIZ_PARAM_Title)
+	testQuiz.QueryString = r.URL.RawQuery
 
 	quizList := r.URL.Query().Get("quizzes")
 	if quizList != "" {
@@ -89,5 +78,5 @@ func urlParamsToQuizDocument(r *http.Request) *quiz.QuizDocument {
 		//append Quizzes:     r.URL.Query().Get(quiz.QUIZ_PARAM_List),
 	}
 
-	return doc
+	return testQuiz
 }
