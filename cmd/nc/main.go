@@ -7,8 +7,7 @@ import (
 )
 
 var (
-	HTTPDconfig httpdConfig
-	serveHTTP   = flag.Bool("serve", false, "Run as webserver / cloud function")
+	serveHTTP = flag.Bool("serve", false, "Run as webserver / cloud function")
 )
 
 func main() {
@@ -16,7 +15,11 @@ func main() {
 		*serveHTTP = true
 	}
 	flag.Parse()
-	HTTPDconfig.address = thisOrThat(os.Getenv("NC_TCP_PORT"), ":2001")
-	fmt.Printf("NC booting. Webeserver: %v\n", *serveHTTP)
-	RunWebserver(HTTPDconfig)
+
+	httpdConfig := httpdConfig{
+		address: thisOrThat(os.Getenv("NC_TCP_PORT"), ":2001"),
+		enabled: *serveHTTP,
+	}
+	fmt.Println("NC booting...")
+	RunWebserver(httpdConfig)
 }

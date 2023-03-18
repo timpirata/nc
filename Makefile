@@ -12,12 +12,16 @@ MATHJAX_URL := https://github.com/mathjax/MathJax/archive/refs/tags/$(MATHJAX_VE
 MATHJAX_ZIP := $(BUILD_ROOT)/$(MATHJAX_VERSION).zip
 MATHJAX_DIR := $(BUILD_ROOT)/MathJax
 MATHJAX_CC  := tex-chtml-full-speech.js
-MATHJAX_TGT := ./output/templates/html/$(MATHJAX_CC)
+MATHJAX_TGT := ./output/templates/js/$(MATHJAX_CC)
 
-nc: $(NC)
+nc: $(NC) ESC
 
-$(NC): cmd/nc/*.go output/*.go quiz/*.go go.mod
+$(NC): ESC cmd/nc/*.go output/*.go quiz/*.go go.mod
+	go generate ./...
 	go build -o $(NC) ./cmd/nc
+
+ESC:
+	test -n "$(shell which esc)" || go install github.com/mjibson/esc
 
 # TODO / TESTS 
 
@@ -57,4 +61,6 @@ gocurl: cmd/gocurl/main.go
 update-mathjax: gocurl
 	mkdir -p $(BUILD_ROOT)
 	$(GOCURL) -remote $(MATHJAX_URL) -local $(MATHJAX_ZIP) -unzipTo $(MATHJAX_DIR)
-	cp $(MATHJAX_DIR)/MathJax-$(MATHJAX_VERSION)/es5/$(MATHJAX_CC) $(MATHJAX_TGT)
+	cp $(MATHJAX_DIR)/MathJax-$(MATHJAX_VERSION)/es5/$(MATHJAX_CC) $(MATHJAX_TGT) 
+	mkdir -p output/templates/js/output/chtml
+	cp -r $(MATHJAX_DIR)/MathJax-$(MATHJAX_VERSION)/es5/output/chtml/fonts output/templates/js/output/chtml

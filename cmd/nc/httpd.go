@@ -1,23 +1,27 @@
 package main
 
+// The webserver portion relies on resources.
+// I rely on this hack as I don't know how to to it correctly using embed.
+//go:generate esc -prefix ../../output/templates -pkg output -o ../../output/assets.go -private ../../output/templates
+
 import (
 	"bytes"
-	// "embed"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 
+	"schnoddelbotz/nc/output"
 	"schnoddelbotz/nc/quiz"
 )
 
 type httpdConfig struct {
 	address string
+	enabled bool
 }
 
 var (
-	config httpdConfig
-	//goatnoet:embed ../../output/templates/html/index.html
+	config    httpdConfig
 	indexHTML string
 )
 
@@ -29,9 +33,13 @@ func thisOrThat(this, that string) string {
 }
 
 func RunWebserver(config httpdConfig) {
-	http.HandleFunc("/", indexHandler)
+	if !config.enabled {
+		return
+	}
+	log.Printf("Webeserver enabled %v, using address %s\n", *serveHTTP, config.address)
 
-	log.Printf("NC Listening for requests on %s", config.address)
+	http.HandleFunc("/", indexHandler)
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(output.MustFs())))
 	err := http.ListenAndServe(config.address, nil)
 
 	if err != nil {
@@ -41,12 +49,23 @@ func RunWebserver(config httpdConfig) {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	quizDoc := urlParamsToQuizDocument(r)
-	log.Printf("built new quiz index doc, haha!")
 	w.Write(renderIndexTemplate(*quizDoc))
+}
+
+func assetHandler(w http.ResponseWriter, r *http.Request) {
+	http.FileServer(output.MustFs())
+	// if r.RequestURI == "/assets/js/tex-chtml-full-speech.js" {
+	// 	w.Header().Set("Content-type", "text/javascript")
+	// 	w.Write(output.MustGetByte("/js/tex-chtml-full-speech.js"))
+	// 	return
+	// }
+	// log.Printf("404 /assets/ %s", r.RequestURI)
 }
 
 func renderIndexTemplate(card quiz.QuizDocument) []byte {
 	buf := &bytes.Buffer{}
+
+	indexHTML := output.MustGetTemplate("/html/index.html")
 	tpl, err := template.New("index").Parse(indexHTML)
 	if err != nil {
 		log.Fatalf("Template parsing error: %v\n", err)

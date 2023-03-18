@@ -17,3 +17,5 @@
 /nc
 /build
 /gocurl
+.DS_Store
+/output/assets.go
