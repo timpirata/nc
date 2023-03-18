@@ -70,7 +70,13 @@ docker-ratzeputz:
 	docker system prune -af
 
 docker-serve: docker-image
+	# running NC using Docker, publishing the application port to http://localhost:2001
 	docker run -p2001:2001 $(DOCKER_IMAGE):latest ./nc -serve
+
+docker-push:
+	# Upload images -tagged above to dockerhub.
+	docker push $(DOCKER_IMAGE):latest
+	docker push $(DOCKER_IMAGE):$(NC_VERSION)
 
 ratzeputz: clean docker-ratzeputz
 
