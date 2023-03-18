@@ -1,3 +1,3 @@
 module schnoddelbotz/nc
 
-go 1.19
+go 1.20

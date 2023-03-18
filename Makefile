@@ -14,7 +14,7 @@ MATHJAX_DIR := $(BUILD_ROOT)/MathJax
 MATHJAX_CC  := tex-chtml-full-speech.js
 MATHJAX_TGT := ./output/templates/html/$(MATHJAX_CC)
 
-all: $(NC)
+nc: $(NC)
 
 $(NC): cmd/nc/*.go output/*.go quiz/*.go go.mod
 	go build -o $(NC) ./cmd/nc
