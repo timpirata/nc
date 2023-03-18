@@ -1,10 +1,23 @@
+# Makefile for nc - The random numerus clausus generator.
 
-NC := ./nc 
+BUILD_ROOT := ./build
+NC := $(BUILD_ROOT)/nc 
+GOCURL := $(BUILD_ROOT)/gocurl
+
+# HTML output dependency MathJax, to render TeX formulae.
+# to update, set version number and run `make update-mathjax`.
+# Then commit to git, to avoid JS build dependencies for us.
+MATHJAX_VERSION := 3.2.2
+MATHJAX_URL := https://github.com/mathjax/MathJax/archive/refs/tags/$(MATHJAX_VERSION).zip
+MATHJAX_ZIP := $(BUILD_ROOT)/$(MATHJAX_VERSION).zip
+MATHJAX_DIR := $(BUILD_ROOT)/MathJax
+MATHJAX_CC  := tex-chtml-full-speech.js
+MATHJAX_TGT := ./output/templates/html/$(MATHJAX_CC)
 
 all: $(NC)
 
 $(NC): cmd/nc/*.go output/*.go quiz/*.go go.mod
-	go build -x -o $(NC) ./cmd/nc
+	go build -o $(NC) ./cmd/nc
 
 # TODO / TESTS 
 
@@ -19,7 +32,8 @@ tests/output/5-each.pdf: nc
 	$(NC) -A 5 -f pdf -o $<
 
 clean:
-	rm -f $(NC)
+	rm -f $(NC) $(GOCURL) $(MATHJAX_ZIP) 
+	rm -rf $(MATHJAX_DIR) 
 
 serve:
 	# run NC as local webserver, serving quizzes on port 7898
@@ -28,3 +42,19 @@ serve:
 deploy:
 	# should deploy as cloudfunction 
 	gcloud deploy
+
+
+#
+# Dependencies 
+
+# instead of relying on curl or wget, we quickly build or own Go downloader,
+# which accidently also includes unzip. Nice, no? Called bootstrapping ;-*
+gocurl: cmd/gocurl/main.go 
+	go build -o $(GOCURL) ./cmd/gocurl 
+
+# https://github.com/mathjax/MathJax 
+# https://docs.mathjax.org/en/latest/web/components/combined.html
+update-mathjax: gocurl
+	mkdir -p $(BUILD_ROOT)
+	$(GOCURL) -remote $(MATHJAX_URL) -local $(MATHJAX_ZIP) -unzipTo $(MATHJAX_DIR)
+	cp $(MATHJAX_DIR)/MathJax-$(MATHJAX_VERSION)/es5/$(MATHJAX_CC) $(MATHJAX_TGT)
