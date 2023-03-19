@@ -47,8 +47,8 @@ clean:
 	rm -rf $(MATHJAX_DIR) 
 
 serve:
-	# run NC as local webserver, serving quizzes on port 7898
-	$(NC) -s -p 7898
+	# run NC as local webserver, serving quizzes on port 2001
+	$(NC) -serve
 
 deploy:
 	# should deploy as cloudfunction 

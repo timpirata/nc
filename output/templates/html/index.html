@@ -2,29 +2,116 @@
 <html>
 <head>
     <title>{{.Title}}</title>
+    <style type="text/css">
+        .hiddenSolution {background-color: black;}
+    </style>
     <!-- https://docs.mathjax.org/en/latest/web/components/combined.html -->
     <script>
         MathJax = {
             // your configuration here, if needed
         };
+        function reveal(what) {
+            what.classList.remove("hiddenSolution");
+        }
     </script>            
     <script type="text/javascript" id="MathJax-script" async src="/assets/js/tex-chtml-full-speech.js"></script>    
 </head>
 <body>
-<h1>nc - {{.Title}}</h1>
-Will this ever work? Who knows.
+<h1>{{.Title}}</h1>
+
+<!-- /index without parameters, present quiz creation form -->
+{{if .ShowForm}}
+Create a new quiz by selecting desired contents:
+<form method="POST">
+    <!-- HACK. Make it so we can dynamically add/remove tasks to form array -->
+    QUIZ Title: <input type="text" name="title" value="Your quiz named ...">
+    <ul>
+        <li>
+            Task type
+            <select name="tasktype">
+                <option value="0" selected>Addition</option>
+                <option value="1">Sutraction</option>
+            </select>
+            Number of tasks:
+            <input type=number name="count" value=2>
+            Include solution:
+            <select name="solutions">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+            Parameters:
+            <input type="text" name="params" size="40" value="left_op_max=10, right_op_max=10">
+        </li>
+        <li>
+            Task type
+            <select name="tasktype">
+                <option value="0" selected>Addition</option>
+                <option value="1">Sutraction</option>
+            </select>
+            Number of tasks:
+            <input type=number name="count" value=3>
+            Include solution:
+            <select name="solutions">
+                <option value="yes">Yes</option>
+                <option value="no" SELECTED>No</option>
+            </select>
+            Parameters:
+            <input type="text" name="params" size="40" value="left_op_max=10, right_op_max=10">
+        </li>
+        <li>
+            Task type
+            <select name="tasktype">
+                <option value="0">Addition</option>
+                <option value="1" selected>Sutraction</option>
+            </select>
+            Number of tasks:
+            <input type=number name="count" value=5>
+            Include solution:
+            <select name="solutions">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+            Parameters:
+            <input type="text" name="params" size="40" value="left_op_max=100, right_op_max=&left_op">
+        </li>
+        <li>
+            Task type
+            <select name="tasktype">
+                <option value="0">Addition</option>
+                <option value="1" selected>Sutraction</option>
+            </select>
+            Number of tasks:
+            <input type=number name="count" value=5>
+            Include solution:
+            <select name="solutions">
+                <option value="yes">Yes</option>
+                <option value="no" SELECTED>No</option>
+            </select>
+            Parameters:
+            <input type="text" name="params" size="40" value="left_op_max=100, right_op_max=200">
+        </li>
+        ADD TASK [js todo]
+    </ul>
+    <input type="submit">
+    <input type="hidden" name="show" value="quiz">
+</form>
+{{end}}
+
+<!-- ?show=quiz -->
+{{if .ShowQuiz}}
+<ol>
+    {{ range $key, $value := .Quizzes }}
+        <li>{{ $value.HTML }} {{if $value.IncludeSolution}} = <span class="hiddenSolution" onclick="return reveal(this);">&nbsp;{{$value.Solution}}&nbsp;</span>{{end}}</li>
+    {{ end }}
+</ol>
+{{end}}
+
+<!-- ?show=examples -->
+{{if .ShowExamples}}
+Will this ever work? Who knows. Example formulas. More to come.
 
 When \(a \ne 0\), there are two solutions to \(ax^2 + bx + c = 0\) and they are
 $$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$
-
-<ol>
-    {{.Quizzes}}
-
-    {{ range $key, $value := . }}
-        <li><strong>{{ $key }}</strong>: {{ $value }}</li>
-    {{ end }}
-</ol>
-
-
+{{end}}
 </body>
 </html>

@@ -6,7 +6,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -68,15 +67,20 @@ func renderIndexTemplate(quizDocument quiz.QuizDocument) []byte {
 }
 
 func urlParamsToQuizDocument(r *http.Request) *quiz.QuizDocument {
-	testQuiz := quiz.ExampleQuiz1() // DEV WIP -> test. tdd?
-	testQuiz.Title = r.URL.Query().Get(quiz.QUIZ_PARAM_Title)
-	testQuiz.QueryString = r.URL.RawQuery
-
-	quizList := r.URL.Query().Get("quizzes")
-	if quizList != "" {
-		fmt.Printf("TODO ... built quiz for %s\n", quizList)
-		//append Quizzes:     r.URL.Query().Get(quiz.QUIZ_PARAM_List),
+	quizDoc := quiz.NewQuizDocument()
+	r.ParseForm()
+	quizDoc.QueryString = r.URL.RawQuery
+	quizDoc.Title = r.Form.Get(quiz.QUIZ_PARAM_Title)
+	show := r.Form.Get(quiz.QUIZ_PARAM_Show)
+	if show == "quiz" {
+		quizDoc.ShowQuiz = true
+		quizDoc.BuildFromForm(r.Form)
+	} else if show == "examples" {
+		quizDoc.Title = "Examples"
+		quizDoc.ShowExamples = true
+	} else {
+		quizDoc.ShowForm = true
+		quizDoc.Title = "New Quiz creation"
 	}
-
-	return testQuiz
+	return quizDoc
 }
